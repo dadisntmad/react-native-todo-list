@@ -3,6 +3,7 @@ export type TodosSliceState = {
   isVisible: boolean;
   editMode: boolean;
   inputValue: string;
+  selectedTodo: string;
 };
 
 export type Todos = {

@@ -6,6 +6,7 @@ const initialState: TodosSliceState = {
   isVisible: false,
   editMode: false,
   inputValue: '',
+  selectedTodo: '',
 };
 
 const todosSlice = createSlice({
@@ -24,9 +25,13 @@ const todosSlice = createSlice({
     setInputValue: (state, action: PayloadAction<string>) => {
       state.inputValue = action.payload;
     },
+    setSelectedTodo: (state, action: PayloadAction<string>) => {
+      state.selectedTodo = action.payload;
+    },
   },
 });
 
-export const { setTodos, setIsVisible, setEditMode, setInputValue } = todosSlice.actions;
+export const { setTodos, setIsVisible, setEditMode, setInputValue, setSelectedTodo } =
+  todosSlice.actions;
 
 export default todosSlice.reducer;

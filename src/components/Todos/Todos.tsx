@@ -24,7 +24,6 @@ export const Todos = () => {
   return (
     <FlatList
       data={todos}
-      extraData={todos}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => {
         return <Todo todo={item} />;

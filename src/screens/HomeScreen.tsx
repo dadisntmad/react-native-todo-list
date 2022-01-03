@@ -4,10 +4,16 @@ import { Button } from '../components/Button/Button';
 import { Todos } from '../components/Todos/Todos';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setInputValue, setIsVisible } from '../features/todosSlice';
-import { selectInputValue, selectIsVisible, selectTodos } from '../selectors/selectors';
+import { setEditMode, setInputValue, setIsVisible } from '../features/todosSlice';
+import {
+  selectEditMode,
+  selectInputValue,
+  selectIsVisible,
+  selectSelectedTodo,
+  selectTodos,
+} from '../selectors/selectors';
 
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export const HomeScreen = () => {
@@ -15,6 +21,8 @@ export const HomeScreen = () => {
   const todos = useSelector(selectTodos);
   const isVisible = useSelector(selectIsVisible);
   const inputValue = useSelector(selectInputValue);
+  const editMode = useSelector(selectEditMode);
+  const selectedTodo = useSelector(selectSelectedTodo);
 
   const onOpenModal = () => {
     dispatch(setIsVisible(true));
@@ -36,6 +44,20 @@ export const HomeScreen = () => {
     dispatch(setInputValue(''));
   };
 
+  const onUpdateTodo = async () => {
+    if (!inputValue) return;
+
+    const todoRef = doc(db, 'todos', selectedTodo);
+
+    await updateDoc(todoRef, {
+      todo: inputValue,
+    });
+
+    dispatch(setIsVisible(false));
+    dispatch(setEditMode(false));
+    dispatch(setInputValue(''));
+  };
+
   return (
     <View>
       {todos.length < 2 ? (
@@ -45,20 +67,37 @@ export const HomeScreen = () => {
       )}
       <View style={styles.centeredView}>
         <Modal animationType="slide" visible={isVisible}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <TextInput
-                placeholder="What do you need to do?"
-                style={styles.textInput}
-                returnKeyType="done"
-                value={inputValue}
-                onChangeText={(text) => dispatch(setInputValue(text))}
-              />
-              <TouchableOpacity style={styles.button} onPress={onCloseModal}>
-                <Text style={styles.text}>ADD</Text>
-              </TouchableOpacity>
+          {editMode ? (
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <TextInput
+                  placeholder="Update current todo"
+                  style={styles.textInput}
+                  returnKeyType="done"
+                  value={inputValue}
+                  onChangeText={(text) => dispatch(setInputValue(text))}
+                />
+                <TouchableOpacity style={styles.button} onPress={onUpdateTodo}>
+                  <Text style={styles.text}>UPDATE</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <TextInput
+                  placeholder="What do you need to do?"
+                  style={styles.textInput}
+                  returnKeyType="done"
+                  value={inputValue}
+                  onChangeText={(text) => dispatch(setInputValue(text))}
+                />
+                <TouchableOpacity style={styles.button} onPress={onCloseModal}>
+                  <Text style={styles.text}>ADD</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </Modal>
       </View>
       <Todos />
