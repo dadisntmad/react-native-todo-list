@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Todos } from '../../types/todosSlice';
+
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../../firebase';
 
 import { Icon } from 'react-native-elements';
 
@@ -11,6 +14,16 @@ type TodoProps = {
 };
 
 export const Todo = ({ todo }: TodoProps) => {
+  const onDeleteTodo = () =>
+    Alert.alert('Confirm', 'Press OK to delete', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      { text: 'OK', onPress: async () => await deleteDoc(doc(db, 'todos', todo.id)) },
+    ]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.todoText}>{todo.todo}</Text>
@@ -24,7 +37,7 @@ export const Todo = ({ todo }: TodoProps) => {
             tvParallaxProperties={undefined}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onDeleteTodo}>
           <Icon
             style={styles.deleteIcon}
             name="delete"
